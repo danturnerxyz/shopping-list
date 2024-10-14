@@ -83,7 +83,7 @@ function getItemsFromStorage() {
 function createButton(classes) {
   const button = document.createElement('button');
   button.className = classes;
-  const icon = createIcon("fa-solid fa-plus");
+  const icon = createIcon("fa-solid fa-x");
   button.appendChild(icon);
   return button;
 }
@@ -95,12 +95,32 @@ function createIcon(classes) {
   return icon;
 }
 
+function onClickItem(e) {
+  if (e.target.parentElement.classList.contains
+    ('remove-item')) {
+      removeItem(e.target.parentElement.parentElement)
+    }
+}
+
 // REMOVE ITEM
-function removeItem(e) {
-  if (e.target.parentElement.classList.contains('remove-item')) {
-    e.target.parentElement.parentElement.remove();
+function removeItem(item) {
+  if (confirm('Are you sure?')) {
+    item.remove();
+
+    removeItemFromStorage(item.textContent);
+
+    resetUI()
   }
-  resetUI()
+}
+
+function removeItemFromStorage(item) {
+  let itemsFromStorage = getItemsFromStorage()
+
+  // FILTER OUT ITEM TO BE REMOVED
+  itemsFromStorage = itemsFromStorage.filter((i) => i !== item);
+
+  // RE-SET TO LOCAL STORAGE
+  localStorage.setItem('items', JSON.stringify(itemsFromStorage))
 }
 
 // CLEAR ALL LIST ITEMS
@@ -108,6 +128,10 @@ function clearItems() {
   while (itemList.firstChild) {
     itemList.removeChild(itemList.firstChild)
   }
+
+  // CLEAR ALL IN LOCALSTORAGE
+  localStorage.removeItem('items')
+
   resetUI()
 }
 
@@ -143,7 +167,7 @@ function resetUI() {
 function init() {
   // EVENT LISTENERS
   itemForm.addEventListener('submit', onAddItemSubmit);
-  itemList.addEventListener('click', removeItem);
+  itemList.addEventListener('click', onClickItem);
   clearBtn.addEventListener('click', clearItems);
   itemFilter.addEventListener('input', filterItems);
   document.addEventListener('DOMContentLoaded', displayItems)
